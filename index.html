@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="http://cdn.webix.io/edge/webix.css" type="text/css" media="screen" charset="utf-8">
+		<script src="http://cdn.webix.io/edge/webix.js" src2="http://cdn.webix.io/edge/webix.js" type="text/javascript" charset="utf-8"></script>
+		<title>Contact List App</title>
+		<style type="text/css">
+			/*details screen*/
+			.infoline h4{ margin:0px; float:left; width:100px;}
+			.infoline { clear:both; margin:10px;}
+			/*mobile font*/
+			.webix_view  input, .webix_list_item{ font-size: 20px; line-height:40px;}
+			body { font-size: 16px; }
+		</style>
+	</head>
+	<body>
+
+		<div id="item_details" style="display:none">
+			<h2>#firstname# #lastname#</h2>
+			<div class='infoline'><h4>Email</h4> #email#</div>
+			<div class='infoline'><h4>Phone</h4> #phone#</div>
+			<div class='infoline'><h4>Address</h4> #city# #zip#</div>
+			<div class='infoline'><h4>Works at</h4> #work#</div>
+			<p style='max-width:320px'>#details#</p>
+		</div>
+
+		<div id="item_list" style="display:none">
+			#firstname# #lastname# <span style='float:right; color:#aaa'>#zip#</span>
+		</div>
+
+		<script type="text/javascript" charset="utf-8">
+		var toolbar = { view:"toolbar", 
+			height:50, visibleBatch:"list", id:"toolbar",
+			elements:[
+				{ view:"button", value:"Back", batch:"details", on:{
+					onItemClick:function(){
+						$$('list').show();
+					}
+				}},
+				{ view:"search", value:"",     batch:"list", on:{
+					onTimedKeyPress:function(){
+						$$('list').filter("firstname", this.getValue());
+					}
+				}}
+			]
+		};
+
+		var list = { 
+			view:"list", id:"list", 
+			type:{ height:50, template:"html->item_list" },
+			url:"contacts.json",
+			on:{
+				onItemClick:function(id){
+					$$('details').show();
+					$$('details').setValues(this.getItem(id));
+				}
+			}
+		};
+
+		var template = { template:"html->item_details", scroll:true, id:"details" };
+
+		webix.ready(function(){
+			webix.ui.fullScreen();
+			webix.ui({
+				rows:[
+					toolbar,
+					{ cells:[ list, template], id:"multiview" }
+				]
+			});
+
+			//show necessary button on toolbar after view change
+			$$("multiview").attachEvent("onViewChange", function(oldview, view){
+				$$('toolbar').showBatch(view);
+			});
+
+			//track history
+			window.location.hash = "";
+			webix.history.track("multiview", "list");
+		});
+		</script>
+	</body>
+</html>
